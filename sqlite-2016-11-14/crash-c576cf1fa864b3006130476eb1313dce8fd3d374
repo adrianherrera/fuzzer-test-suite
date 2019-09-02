@@ -1,0 +1,1 @@
+SELECT A >+group_concat(1,1)`a` FROM(SELECt(1,1)`a` FROM(SELECT 1)WHERE NOT 1)WeERE NOT(
