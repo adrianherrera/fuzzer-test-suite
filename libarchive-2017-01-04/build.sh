@@ -7,7 +7,7 @@
 build_lib() {
   rm -rf BUILD
   cp -rf SRC BUILD
-  (cd BUILD/build && ./autogen.sh && cd .. && ./configure --disable-shared --without-nettle && make -j $JOBS)
+  (cd BUILD/build && ./autogen.sh && cd .. && ./configure --without-nettle --without-expat --disable-shared && make -j $JOBS)
 }
 
 get_git_revision https://github.com/libarchive/libarchive.git 51d7afd3644fdad725dd8faa7606b864fd125f88 SRC
@@ -19,4 +19,4 @@ if [[ $FUZZING_ENGINE == "hooks" ]]; then
   LIB_FUZZING_ENGINE="$LIB_FUZZING_ENGINE -fsanitize=address"
 fi
 set -x
-$CXX $CXXFLAGS -std=c++11 $SCRIPT_DIR/libarchive_fuzzer.cc -I BUILD/libarchive BUILD/.libs/libarchive.a $LIB_FUZZING_ENGINE -lz  -lbz2 -lxml2 -lcrypto -lssl -llzma -o $EXECUTABLE_NAME_BASE
+$CXX $CXXFLAGS -std=c++11 $SCRIPT_DIR/libarchive_fuzzer.cc -I BUILD/libarchive BUILD/.libs/libarchive.a $LIB_FUZZING_ENGINE -lz  -lbz2 -lxml2 -lcrypto -lssl -llzma $LDFLAGS -o $EXECUTABLE_NAME_BASE
