@@ -22,4 +22,4 @@ if [[ $FUZZING_ENGINE == "hooks" ]]; then
   LIB_FUZZING_ENGINE="$LIB_FUZZING_ENGINE -fsanitize=address"
 fi
 set -x
-$CXX $CXXFLAGS -std=c++11  $SCRIPT_DIR/target.cc -I BUILD/include BUILD/.libs/libxml2.a $LIB_FUZZING_ENGINE -lz -o $EXECUTABLE_NAME_BASE
+$CXX $CXXFLAGS -std=c++11  $SCRIPT_DIR/target.cc -I BUILD/include BUILD/.libs/libxml2.a $LIB_FUZZING_ENGINE -lz $LDFLAGS -o $EXECUTABLE_NAME_BASE
