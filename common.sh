@@ -2,12 +2,14 @@
 # Copyright 2017 Google Inc. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 
+set -x
+
 # Don't allow to call these scripts from their directories.
 [ -e $(basename $0) ] && echo "PLEASE USE THIS SCRIPT FROM ANOTHER DIR" && exit 1
 
 # Ensure that fuzzing engine, if defined, is valid
 FUZZING_ENGINE=${FUZZING_ENGINE:-"fsanitize_fuzzer"}
-POSSIBLE_FUZZING_ENGINE="libfuzzer afl honggfuzz coverage fsanitize_fuzzer hooks"
+POSSIBLE_FUZZING_ENGINE="libfuzzer afl honggfuzz coverage fsanitize_fuzzer hooks infer"
 !(echo "$POSSIBLE_FUZZING_ENGINE" | grep -w "$FUZZING_ENGINE" > /dev/null) && \
   echo "USAGE: Error: If defined, FUZZING_ENGINE should be one of the following:
   $POSSIBLE_FUZZING_ENGINE. However, it was defined as $FUZZING_ENGINE" && exit 1
@@ -39,6 +41,12 @@ elif [[ $FUZZING_ENGINE == "honggfuzz" ]]; then
 elif [[ $FUZZING_ENGINE == "coverage" ]]; then
   export CFLAGS=${CFLAGS:-$COVERAGE_FLAGS}
   export CXXFLAGS=${CXXFLAGS:-$COVERAGE_FLAGS}
+elif [[ $FUZZING_ENGINE == "infer" ]]; then
+  export CFLAGS=${CFLAGS:-"-O2 -fno-omit-frame-pointer -gline-tables-only"}
+  export CXXFLAGS=${CXXFLAGS:-"-O2 -fno-omit-frame-pointer -gline-tables-only"}
+
+  shopt -s expand_aliases
+  alias make="infer --no-html --no-cost --no-liveness --no-uninit --bufferoverrun -- /usr/bin/make"
 else
   export CFLAGS=${CFLAGS:-"$FUZZ_CXXFLAGS"}
   export CXXFLAGS=${CXXFLAGS:-"$FUZZ_CXXFLAGS"}
@@ -97,6 +105,10 @@ build_coverage () {
 build_hooks() {
   LIB_FUZZING_ENGINE=libFuzzingEngine-hooks.o
   $CXX -c $HOOKS_FILE -o $LIB_FUZZING_ENGINE
+}
+
+build_infer() {
+  build_coverage
 }
 
 build_fuzzer() {
